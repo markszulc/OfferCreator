@@ -64,7 +64,6 @@ function AudienceList({ offerData, setOfferData , props }) {
     <div className="other-info-container">
       <TableView
           renderEmptyState={renderEmptyState}
-          height="size-3000"
           selectionMode="multiple"
           selectedKeys={offerData.selectedAudience}
           onSelectionChange={(input) =>

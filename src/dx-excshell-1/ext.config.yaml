@@ -39,6 +39,7 @@ runtimeManifest:
             AEM_OFFER_ENDPOINT: $AEM_OFFER_ENDPOINT
             AEM_OFFER_PATH: $AEM_OFFER_PATH
             AEM_XF_DESTINATION_PATH: $AEM_XF_DESTINATION_PATH
+            AEM_AUTHOR_HOST: $AEM_AUTHOR_HOST
           annotations:
             require-adobe-auth: true
             final: true
@@ -60,6 +61,18 @@ runtimeManifest:
             AEM_AUTHOR: $AEM_AUTHOR
             AEM_OFFER_ENDPOINT: $AEM_OFFER_ENDPOINT
             AEM_OFFER_PATH: $AEM_OFFER_PATH
+            WORKFRONT_API_KEY: $WORKFRONT_API_KEY
+            WORKFRONT_URL: $WORKFRONT_URL
+          annotations:
+            require-adobe-auth: true
+            final: true
+        generateCopy:
+          function: actions/generateCopy/index.js
+          web: 'yes'
+          runtime: 'nodejs:14'
+          inputs:
+            LOG_LEVEL: debug
+            CHAT_GPT_KEY: $CHAT_GPT_KEY
           annotations:
             require-adobe-auth: true
             final: true

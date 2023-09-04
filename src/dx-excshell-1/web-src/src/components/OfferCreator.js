@@ -17,6 +17,8 @@ const OfferCreator = (props) => {
     selectedAudience: null,
     excCloudAudiences: true,
     offerCopy: "",
+    offerTitle: "",
+    offerDescription: "",
     offerID: ""
   });
 
@@ -62,9 +64,12 @@ const OfferCreator = (props) => {
 
     var val = Math.floor(1000 + Math.random() * 9000);
     console.log("Offer #" + val);
-    params.title = val.toString();
-    params.description = offerData.offerCopy;
+    params.name = val.toString();
+    params.offers = offerData.offers;
+    // params.title = offerData.offerTitle;
+    // params.description = offerData.offerDescription;
     params.brief = offerData.keymessage;
+    params.audiences = offerData.selectedAudience;
 
 
     try {

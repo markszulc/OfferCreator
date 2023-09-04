@@ -61,7 +61,7 @@ async function main (params) {
         const variationEndpoint = params.AEM_AUTHOR + params.AEM_XF_DESTINATION_PATH + xfName + '/' + variation + '/jcr:content/root//contentfragment'
         logger.info('VARIATION: ' + variationEndpoint);
         const postParams = new URLSearchParams();
-        postParams.append('fragmentPath', "/content/dam/frescopa/en/offers/" + xfName)
+        postParams.append('fragmentPath', "/content/dam/securbank/en/offers/" + xfName)
 
         const res = await fetch(variationEndpoint, {
             method: 'post',
@@ -100,7 +100,7 @@ async function main (params) {
     //END 
 
     //START Modify CF metadata
-    const offerFragmentEndpoint = params.AEM_AUTHOR + "/content/dam/frescopa/en/offers/" + xfName + '/jcr:content/metadata'
+    const offerFragmentEndpoint = params.AEM_AUTHOR + "/content/dam/securbank/en/offers/" + xfName + '/jcr:content/metadata'
     const offerPostParams = new URLSearchParams();
     offerPostParams.append('processed', 'true')
 

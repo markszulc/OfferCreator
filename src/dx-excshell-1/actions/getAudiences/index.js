@@ -25,14 +25,14 @@ async function main (params) {
 
     // extract the user Bearer token from the Authorization header
     const token = getBearerToken(params)
-    const apiEndpoint = 'https://mc.adobe.io/mark-szulc/target/audiences';
+    const apiEndpoint = 'https://mc.adobe.io/ags050/target/audiences';
     
     // fetch content from external api endpoint
     const res = await fetch(apiEndpoint, {
         method: 'get',
         headers: {
             'Authorization': 'Bearer ' + token,
-            'X-Api-Key': '070fd39573fc4798b261c517a63d858d'
+            'X-Api-Key': '31c794f8ab994967b74e5e02742ecf73'
         }})
     if (!res.ok) {
       throw new Error('request to ' + apiEndpoint + ' failed with status code ' + res.status)

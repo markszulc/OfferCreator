@@ -58,8 +58,7 @@ const OfferList = (props) => {
     {name: 'Description', uid: 'description', width: 400},
     {name: 'Modified by', uid: 'modifiedby', width: 200},
     {name: 'Status', uid: 'status', width: 120},
-    {name: 'Content Fragment', uid: 'cfpath', width: 200},
-    {name: 'Experience Fragment', uid: 'xfpath', width: 200}
+    {name: 'Content Fragment', uid: 'cfpath', width: 300}
   ];
 
   let [isOpen, setOpen] = React.useState(false);
@@ -175,12 +174,12 @@ const OfferList = (props) => {
                 <StatusLight isHidden={!(item.published)} variant="positive"></StatusLight>
                 <StatusLight isHidden={(item.published)} variant="info"></StatusLight>
               </Cell>
-              <Cell><ActionButton width="size-1000"  aria-label="Edit Content Fragment" onPress={() => openInNewTab(item.cfedit)}><EditIcon width="size-400" marginStart="size-130" marginEnd="size-70" /><Text> Edit</Text></ActionButton>
+              <Cell><ActionButton width="size-1200"  aria-label="Edit Content Fragment" onPress={() => openInNewTab(item.cfedit)}><EditIcon width="size-400" marginStart="size-130" marginEnd="size-70" /><Text> Edit</Text></ActionButton>
                 </Cell>
-              <Cell>
+              {/* <Cell>
                 <ActionButton isHidden={(item.xfcreated)} width="size-1000" aria-label="Create Experience Fragment" onPress={() => invokeXFCopyAction(item.title, item.description )}><AddIcon width="size-400" marginStart="size-100" marginEnd="size-80" /><Text>Create</Text></ActionButton>
                 <ActionButton isHidden={(!item.xfcreated)} width="size-1000" aria-label="Edit Experience Fragment" onPress={() => openInNewTab(item.xfauthlink)}><EditIcon width="size-400" marginStart="size-130" marginEnd="size-70" /><Text>Edit</Text></ActionButton>
-              </Cell>
+              </Cell> */}
             </Row>
           )}
         </TableBody> 
