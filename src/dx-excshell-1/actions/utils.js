@@ -101,6 +101,14 @@ function getBearerToken (params) {
   }
   return undefined
 }
+
+function getAPIKey (params) {
+  if (params.__ow_headers &&
+    params.__ow_headers['x-api-key'] ) {
+    return params.__ow_headers['x-api-key'];
+  }
+  return undefined
+}
 /**
  *
  * Returns an error response object and attempts to log.info the status code and error message
@@ -132,6 +140,7 @@ function errorResponse (statusCode, message, logger) {
 module.exports = {
   errorResponse,
   getBearerToken,
+  getAPIKey,
   stringParameters,
   checkMissingRequestInputs
 }

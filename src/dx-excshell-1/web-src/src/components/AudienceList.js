@@ -5,7 +5,7 @@ import NotFound from '@spectrum-icons/illustrations/NotFound';
 import {useAsyncList} from '@react-stately/data'
 import PropTypes from 'prop-types'
 import actions from '../config.json'
-import actionWebInvoke from '../utils'
+import {actionWebInvoke} from '../utils'
 
 function AudienceList({ offerData, setOfferData , props }) {
 
@@ -42,15 +42,14 @@ function AudienceList({ offerData, setOfferData , props }) {
       }
 
       let res = await actionWebInvoke(actions['getAudiences'], headers, params);
-      console.log('getAudiences Action Result: ', res);
       
       let audienceresult = res.audiences
-      console.log(offerData.exCloudAudiences);
       
       if (offerData.exCloudAudiences === true) {
         audienceresult = res.audiences.filter((audience) => audience.origin == "cloud")
-        console.log("filtered audiences: ", audienceresult);
       }
+
+      offerData.audiences = audienceresult
 
       return {
   
@@ -64,7 +63,6 @@ function AudienceList({ offerData, setOfferData , props }) {
     <div className="other-info-container">
       <TableView
           renderEmptyState={renderEmptyState}
-          height="size-3000"
           selectionMode="multiple"
           selectedKeys={offerData.selectedAudience}
           onSelectionChange={(input) =>

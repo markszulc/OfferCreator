@@ -3,15 +3,14 @@
 */
 
 import React, { useState }  from 'react'
-import { Heading, View, Content, Link, Image, Text, TextArea, ActionMenu, Edit, Delete} from '@adobe/react-spectrum'
-import {Item, ListView} from '@react-spectrum/list'
+import { Heading, View, Content, Link, Image, Text, TextArea, ActionMenu, Edit, Delete, Item, ListView} from '@adobe/react-spectrum'
 
 import PropTypes from 'prop-types'
 import {useAsyncList} from '@react-stately/data'
 
 
 import actions from '../config.json'
-import actionWebInvoke from '../utils'
+import { actionWebInvoke } from '../utils'
 
 const BannerCreator = (props) => {
   const [state, setState] = useState({

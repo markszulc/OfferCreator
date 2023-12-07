@@ -69,7 +69,6 @@ body {
   margin-top: 15px;
 }
 
-.spectrum-ActionButton_e2d99e {
-  width: 100px;
+.h_OVWW_spectrum-Dialog.h_OVWW_spectrum-Dialog--dismissable .h_OVWW_spectrum-Dialog-grid .h_OVWW_spectrum-Dialog-buttonGroup {
+  display: block !important;
 }
-

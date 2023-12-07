@@ -3,7 +3,7 @@
 */
 
 import React from 'react'
-import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
+import { Provider, defaultTheme, Grid, View, TableView, TableHeader, Column, TableBody, Row, Cell } from '@adobe/react-spectrum'
 import ErrorBoundary from 'react-error-boundary'
 import { HashRouter as Router, Switch, Route } from 'react-router-dom'
 import SideBar from './SideBar'
@@ -11,6 +11,10 @@ import ActionsForm from './ActionsForm'
 import BannerCreator from './BannerCreator'
 import OfferCreator from './OfferCreator'
 import OfferList from './OfferList'
+import OfferDetails from './OfferDetails'
+import OfferListSimple from './OfferListSimple'
+import { ToastContainer } from '@react-spectrum/toast'
+import EnvironmentProvider from './EnvironmentProvider'
 
 function App (props) {
   console.log('runtime object:', props.runtime)
@@ -28,8 +32,10 @@ function App (props) {
 
   return (
     <ErrorBoundary onError={onError} FallbackComponent={fallbackComponent}>
-      <Router>
-        <Provider theme={defaultTheme} colorScheme={`light`}>
+    <Router>
+      <Provider theme={defaultTheme} colorScheme={`light`}>
+        <EnvironmentProvider ims={props.ims}>
+          <ToastContainer/>
           <Grid
             areas={['sidebar content']}
             columns={['0px', '3fr']}
@@ -52,12 +58,16 @@ function App (props) {
                 <Route path='/offercreator'>
                   <OfferCreator runtime={props.runtime} ims={props.ims}></OfferCreator>
                 </Route>
+                <Route path='/offerdetails'>
+                  <OfferDetails runtime={props.runtime} ims={props.ims} props={props}></OfferDetails>
+                </Route>
               </Switch>
             </View>
           </Grid>
-        </Provider>
-      </Router>
-    </ErrorBoundary>
+        </EnvironmentProvider>
+      </Provider>
+    </Router>
+  </ErrorBoundary>
   )
 
   // Methods

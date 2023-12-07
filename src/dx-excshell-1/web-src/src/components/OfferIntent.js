@@ -3,12 +3,10 @@ import { Heading, View, Button, Content, Link, Image, Flex, Text, Form, Progress
   Picker, Edit, Delete, TextArea} from '@adobe/react-spectrum'
 
 function OfferIntent({ offerData, setOfferData  }) {
-
-  
   return (
     <div className="offer-intent">
 
-      <h3>Enter a description that describes the intent of the Offer</h3>
+      <h3>Describe the key segment</h3>
       <TextArea 
         isRequired necessityIndicator="icon"
         value={offerData.keymessage}

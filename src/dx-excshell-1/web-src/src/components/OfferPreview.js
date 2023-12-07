@@ -1,72 +1,127 @@
-import React, { useState }  from 'react'
-import { Heading, View, Button, Content, NavLink, Link, Image, Flex, Text, Form, ProgressCircle, TextField, TextArea, ActionButton, TableView, TableHeader, Column, TableBody, Row, Cell, StatusLight,
-  Picker, Edit, Delete} from '@adobe/react-spectrum'
-import actions from '../config.json'
-import actionWebInvoke from '../utils'
-import { async } from 'regenerator-runtime'
+import React, { useState, useEffect }  from 'react'
+import { View, Grid, ProgressBar} from '@adobe/react-spectrum'
+import PreviewSideBar from './PreviewSideBar'
+import PreviewHome from './PreviewHome'
+import { invokeFireflyAction, invokeFirefallAction, invokePromptGeneratorAction } from '../genai-utils'
 
-function OfferPreview({ offerData, setOfferData , props }) {
-  
- 
+function OfferPreview({ offerData, items, setOfferData, setItems, props, setPage }) {
 
-  console.log('offerData', offerData);
+  const [genAILoading, setIsGenAILoading] = useState(true);
+  const [loading, setLoading] = useState(0);
+  const [loadingText, setLoadingText] = useState('Generating Default Content');
 
-  async function invokeAction () {
-    console.log("Create Offer invoked")
-    const headers =  {}
-    const params =  {}
-        // set the authorization header and org from the ims props object
-        if (props.ims.token && !headers.authorization) {
-          headers.authorization = `Bearer ${props.ims.token}`
+  useEffect(() => {
+    setIsGenAILoading(true)
+    if(items.length > 0) {
+      setIsGenAILoading(false)
+    } else {
+        let newItems = [];
+        let index = 1;
+        newItems.push({id: index, name: "Default", description: offerData.keymessage});
+        index++
+        if(offerData.selectedAudience) {
+          for (var it = offerData.selectedAudience.values(), val= null; val=it.next().value; ) {
+            console.log(val);
+            const audienceDetails = getAudienceDetails(val);
+            newItems.push({id: index, name: val, description: audienceDetails.description, loadingState: true});
+            index++;
+          }
         }
-        if (props.ims.org && !headers['x-gw-ims-org-id']) {
-          headers['x-gw-ims-org-id'] = props.ims.org
-        }
 
-    try {
-      const actionResponse = await actionWebInvoke(actions["dx-excshell-1/createOffer"], headers, params)
-      formattedResult = JSON.stringify(actionResponse,0,2)
-      console.log(`Response :`, actionResponse)
-    } catch (e) {
-      console.error(e)
-      
+        const fetchData = async () => {
+          const wipItems = []
+          for (let index = 0; index < newItems.length; index++) {
+            const item = newItems[index];
+            
+            setLoading(0);
+            setLoadingText(item.name + ': Generating AI prompts');
+
+            const fireflyPrompt = await invokePromptGeneratorAction(item.description, props)
+            setLoading(25)
+            setLoadingText(item.name + ': Generating images');
+            
+            const fireflyImages = await invokeFireflyAction(fireflyPrompt, props)
+            setLoading(50)
+            console.log('Firefly images ', fireflyImages)
+            setLoadingText(item.name + ': Generating and reviewing copy');
+            const firefallResponse = await invokeFirefallAction(item.description, 'neutral', props)
+            setLoading(75)
+            if(fireflyPrompt.error || fireflyImages.error || firefallResponse.error) {
+              item.error = true;
+            }
+            item.selectedImage = !fireflyImages.error ? fireflyImages[0].image : "";
+            item.fireflyPrompt = fireflyPrompt;
+            item.firefallPrompt = item.description;
+            item.firefallResponse = firefallResponse
+            item.fireflyResponse = !fireflyImages.error ? fireflyImages : []
+            item.loadingState = false;
+            item.toneOfVoice = 'neutral';
+
+            newItems[index] = item;
+            wipItems[index] = item
+            setItems(newItems)
+            await sleep(1000);
+            if(index === 0) {
+              setOfferData({ ...offerData, activeAudience: newItems[0]})
+            }
+            setLoading(100)
+            setIsGenAILoading(false)
+          }
+          setItems(newItems)
+        }
+        fetchData();
     }
+  }, []);
+
+  function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 
-  async function writeCopy () {
-    console.log ("Writing copy"); 
-    newcopy = "Inviting our subscribers to trial our latest blend.";
-    setOfferData({ ...offerData, offerCopy : newcopy })
+  function getAudienceDetails(audienceName) {
+    for (let index = 0; index < offerData.audiences.length; index++) {
+        const element = offerData.audiences[index];
+        if(element.name === audienceName) {
+            return element
+        }
+    }
+
+    return null;
+  }
+
+  function renderPreview() {
+      return <Grid
+        areas={['sidebar content']}
+        columns={['350px', '3fr']}
+        rows={['auto']}
+        gap='size-100'
+        isHidden={genAILoading}
+      >
+        <View 
+            gridArea='sidebar'
+            padding='size-200'>
+            <PreviewSideBar offerData={offerData} items={items} setOfferData={setOfferData} setItems={setItems} props={props} setPage={setPage}></PreviewSideBar>
+        </View>
+        <View
+          paddingTop='size-600'>
+          <PreviewHome offerData={offerData} items={items} setOfferData={setOfferData} setItems={setItems}></PreviewHome>
+        </View>
+      </Grid>
   }
 
   return (
-
-    
-    <div className="other-info-container">
-          <Flex direction="column" height="size-800" gap="size-100" marginTop="size-300">
-  
-      <TextArea
-        label="Creative Brief"
-        height="size-1250"
-        width="1200px"
-        value={"Create an offer to " + offerData.keymessage + " targeting an audience of " + offerData.selectedAudience.currentKey + "."}
-      />
-      
-      <Flex direction="row" height="size-800" gap="size-100" >
-        <Button onPress={writeCopy.bind(this)}>Copywrite</Button>
-      </Flex>
-
-      <TextArea
-        label="Offer Copy"
-        value={offerData.offerCopy}
-        onChange={(value) =>
-          setOfferData({ ...offerData, offerCopy : value })
-        }
-        height="size-1250"
-        width="size-3600"
-       /> 
-      </Flex>
-    </div>
+    <>
+      {!genAILoading &&  
+        renderPreview()
+      }
+      {genAILoading &&
+        <div style={{height: "100%",  padding: 0, margin: 0, alignItems: 'center', justifyContent: 'center', display: 'flex'}}>
+          <ProgressBar width="600px" label={loadingText} value={loading} />
+        </div>
+        
+      }
+    </>
   );
 }
 

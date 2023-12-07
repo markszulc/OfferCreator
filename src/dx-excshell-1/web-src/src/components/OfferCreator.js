@@ -4,8 +4,9 @@ import OfferIntent from "./OfferIntent";
 import AudienceList from "./AudienceList";
 import OfferPreview from "./OfferPreview";
 import actions from '../config.json';
-import actionWebInvoke from '../utils';
+import {actionWebInvoke} from '../utils';
 import {Link as RouterLink, useHistory} from 'react-router-dom';
+import OfferWizard from './OfferWizard';
 
 
 const OfferCreator = (props) => {
@@ -17,8 +18,12 @@ const OfferCreator = (props) => {
     selectedAudience: null,
     excCloudAudiences: true,
     offerCopy: "",
+    offerTitle: "",
+    offerDescription: "",
     offerID: ""
   });
+
+  const [items, setItems] = useState([]);
 
   const [state, setState] = useState({
     actionResponseError: null,
@@ -32,15 +37,20 @@ const OfferCreator = (props) => {
     actionResult: null
   });
   
-  const FormTitles = ["Create a new Offer", "Who is the target audience?", "Is this what you want created?"];
+  const FormTitles = ["Create a new Offer", "Select audiences for variations", "Offer Preview", "Offer Wizard"];
   const PageDisplay = () => {
     if (page === 0) {
       return <OfferIntent offerData={offerData} setOfferData={setOfferData} />;
     } else if (page === 1) {
       return <AudienceList offerData={offerData} setOfferData={setOfferData} props={props} />;
-    } else {
-      return <OfferPreview offerData={offerData} setOfferData={setOfferData} props={props} />;
-    } 
+    } else if (page === 2) {
+      return <OfferPreview offerData={offerData} items={items} setOfferData={setOfferData} setItems={setItems} props={props} setPage={setPage} />;
+      // return <OfferPreview offerData={offerData} setOfferData={setOfferData} props={props} />;
+    } else if (page === 3) {
+      return <OfferWizard offerData={offerData} items={items} setOfferData={setOfferData} setItems={setItems} props={props} />;
+    }else {
+      return <OfferPreview offerData={offerData} items={items} setOfferData={setOfferData} setItems={setItems} props={props} />;
+    }
   };
 
   const openRoute = url => {
@@ -48,7 +58,6 @@ const OfferCreator = (props) => {
   };
 
   async function invokeAction () {
-    console.log("Create Offer invoked")
     setState({ ...state, actionInvokeInProgress: true, actionResult: 'calling action ... ' })
     const headers = state.actionHeaders || {}
     const params = state.actionParams || {}
@@ -61,10 +70,12 @@ const OfferCreator = (props) => {
     }
 
     var val = Math.floor(1000 + Math.random() * 9000);
-    console.log("Offer #" + val);
-    params.title = val.toString();
-    params.description = offerData.offerCopy;
+    params.name = val.toString();
+    params.offers = offerData.offers;
+    // params.title = offerData.offerTitle;
+    // params.description = offerData.offerDescription;
     params.brief = offerData.keymessage;
+    params.audiences = offerData.selectedAudience;
 
 
     try {
@@ -77,10 +88,8 @@ const OfferCreator = (props) => {
         actionResponseError: null,
         actionInvokeInProgress: false
       })
-      console.log(`Response :`, actionResponse);
     } catch (e) {
       console.error(e)
-      
     }
   }
 
@@ -137,13 +146,6 @@ const OfferCreator = (props) => {
             <Button marginTop="size-100" onPress={() => openRoute()}><Text flex>Offer List</Text></Button>
           </View>
         )}
-        <div className="wizardsummary">
-          <Well>
-            <p><strong>Offer Description: </strong>{offerData.keymessage}</p>
-            <p><strong>Selected Audiences: </strong>{offerData.selectedAudience}</p>
-            <p><strong>Offer Copy: </strong>{offerData.offerCopy}</p>
-          </Well>
-        </div>
     </View>
   )
 }

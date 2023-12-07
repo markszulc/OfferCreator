@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 const { Core } = require('@adobe/aio-sdk')
-const { errorResponse, getBearerToken, stringParameters, checkMissingRequestInputs } = require('../utils')
+const { errorResponse, getBearerToken, getAPIKey, stringParameters, checkMissingRequestInputs } = require('../utils')
 
 // main function that will be executed by Adobe I/O Runtime
 async function main (params) {
@@ -25,7 +25,10 @@ async function main (params) {
 
     // extract the user Bearer token from the Authorization header
     const token = getBearerToken(params)
+    const apiKey = getAPIKey(params)
     const apiEndpoint = params.AEM_AUTHOR + params.AEM_OFFER_ENDPOINT;
+
+    logger.info("**API KEY** " + apiKey)
     
     // fetch content from external api endpoint
     const res = await fetch(apiEndpoint, {
@@ -41,18 +44,37 @@ async function main (params) {
     var assetList = [];
     
     for (let key in content["entities"]) {
-      var asset = {};
-      asset["id"] = key;
-      asset["title"] = content["entities"][key]["properties"].title;
-      asset["description"] = content["entities"][key]["properties"].description;
-      asset["modifiedby"] = content["entities"][key]["properties"].modifiedBy;
-      asset["published"] = content["entities"][key]["properties"].published;
-      asset["cfauthlink"] = content["entities"][key]["links"][0].href;
-      asset["xfcreated"] = content["entities"][key]["properties"]["metadata"].xfcreated;
-      asset["xfauthlink"] = params.AEM_AUTHOR + "/ui#/aem/editor.html/" + params.AEM_XF_DESTINATION_PATH +  asset["title"] + "/master.html";
-      asset["cfedit"] = asset["cfauthlink"].replace("api/assets", "ui#/aem/editor.html/content/dam").replace(/\.[^/.]+$/, "");
-           
-      assetList.push(asset);
+      if(!content["entities"][key]["class"][0].includes("folder")){
+        var asset = {};
+        asset["id"] = key;
+        asset["title"] = content["entities"][key]["properties"].title;
+        asset["description"] = content["entities"][key]["properties"].description;
+        asset["modifiedby"] = content["entities"][key]["properties"].modifiedBy;
+        asset["published"] = content["entities"][key]["properties"].published;
+        asset["cfauthlink"] = content["entities"][key]["links"][0].href;
+        asset["xfcreated"] = content["entities"][key]["properties"]["metadata"].xfcreated;
+        asset["xfauthlink"] = params.AEM_AUTHOR + "/ui#/aem/editor.html/" + params.AEM_XF_DESTINATION_PATH +  asset["title"] + "/master.html";
+        
+        
+        asset["cfpath"] = asset["cfauthlink"].replace("api/assets", "/content/dam").replace(/\.[^/.]+$/, "");
+        asset["cfedit"] = `https://experience.adobe.com/?repo=${params.AEM_AUTHOR_HOST}#/@ags050/aem/cf/editor/editor${new URL(asset["cfpath"]).pathname}?appId=aem-cf-editor`;
+
+        const cfRes = await fetch(asset["cfpath"] + '/jcr%3Acontent.json', {
+          method: 'get',
+          headers: {
+              'Authorization': 'Bearer ' + token
+          }})
+      if (!res.ok) {
+        throw new Error('request to CF metadata failed with status code ' + res.status)
+      }
+      const assetMetadata = await cfRes.json();
+
+      if(assetMetadata["targetOfferID"]) {
+        asset["cfTargetOfferId"] = assetMetadata["targetOfferID"];
+      }
+            
+        assetList.push(asset);
+      }
     }
   
     const response = {
